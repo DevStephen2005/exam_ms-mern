@@ -1,59 +1,38 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-const userSchema = new Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true
-    },
-    phone: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    address: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    city: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    state: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    zipCode: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    image: {
-        type: String,  // This will store the path of the uploaded image
-    },
-    role: {
-        type: String,
-        enum: ['admin', 'student'],
-        default: 'student',
-        required: true
-    }
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+
+  password: {
+    type: String,
+    required: true,
+  },
+
+  role: {
+    type: String,
+    enum: ['student', 'admin'],
+    default: 'student',
+  }
+
 }, { timestamps: true });
 
-const userModel = mongoose.model('User', userSchema);
+// Hash password before saving
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
 
-module.exports = userModel;
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;

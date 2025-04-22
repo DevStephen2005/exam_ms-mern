@@ -20,37 +20,43 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
       const response = await axios.post("http://localhost:8000/login", formData);
-      const { token, role, userId } = response.data; // Assuming the server returns { token: "JWT_TOKEN", role: "admin" or "student", userId: "USER_ID" }
-
-      // Store token, role, and userId in localStorage
+      const { token, role, userId, name } = response.data; // Ensure `name` is returned from the backend
+  
+      // ✅ Store credentials in localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
       localStorage.setItem("userId", userId);
+      localStorage.setItem("userEmail", formData.email);
+      localStorage.setItem("userName", name);  // Store user's name
+  
+      console.log("User logged in:", response.data);
+      console.log("name: ", response.data.name);
 
-      console.log("User logged in successfully:", response.data);
-      console.log("Role:", response.data.role);
-
+  
       setLoading(false);
-
-      // Navigate based on user role
-      if (formData.email === "admin@gmail.com" && formData.password === "admin@100" ) {
-        navigate("/admin-dashboard");
+  
+      // ✅ Navigate based on role
+      if (role === "admin") {
+        navigate("/admin_dashboard");
+      } else if (role === "student") {
+        navigate("/student_dashboard");
       } else {
-        navigate("/profile")
+        navigate("/");
       }
-      
+  
     } catch (error) {
       setLoading(false);
       if (error.response) {
-        setError(error.response.data.message || "An error occurred during login.");
+        setError(error.response.data.message || "Login failed.");
       } else {
         setError("Network error. Please try again later.");
       }
     }
   };
+  
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">

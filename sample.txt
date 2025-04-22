@@ -1,0 +1,40 @@
+📄 Pages (Screens) – Main Routes
+LandingPage.jsx – (Optional) Welcome or intro page
+
+Login.jsx – Login form for students/admin
+
+Register.jsx – User registration page
+
+Dashboard.jsx – Student dashboard showing available exams
+
+ExamRegistrationForm.jsx – Form to register for an exam
+
+ExamSchedule.jsx – View all available exams with filters
+
+MyRegistrations.jsx – View student's registered exams
+
+AdminDashboard.jsx – Admin dashboard
+
+AdminAddExam.jsx – Admin adds new exams
+
+AdminViewRegistrations.jsx – Admin views all student registrations
+
+NotFound.jsx – 404 fallback page (optional)
+
+🧩 Components (Reusable)
+Navbar.jsx – Top navigation bar
+
+Footer.jsx – Bottom footer section
+
+ExamCard.jsx – Displays an individual exam (used in Dashboard/ExamSchedule)
+
+RegistrationCard.jsx – For showing registered exam info (used in MyRegistrations/AdminView)
+
+FilterBar.jsx – Filters for exam name, date, venue (used in ExamSchedule)
+
+ProtectedRoute.jsx – For protecting student/admin routes
+
+LoadingSpinner.jsx – Optional loader
+
+Toast.jsx / Alert.jsx – Notification for success/error messages
+

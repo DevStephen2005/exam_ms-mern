@@ -1,158 +1,191 @@
-const express = require('express');
+require("dotenv").config();
+
+const express = require("express");
 const app = express();
-const cors = require('cors');
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt'); // For password hashing
-const jwt = require('jsonwebtoken'); // For JWT token generation
+const cors = require("cors");
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt"); // For password hashing
+const jwt = require("jsonwebtoken"); // For JWT token generation
 const multer = require("multer");
 const path = require("path");
 
-const userModel = require('./models/userModel'); // Ensure this model exists and is correct
+const User = require("./models/userModel"); // Ensure this model exists and is correct
+const RegistrationModel = require("./models/registrationModel"); 
+const ExamModel = require("./models/ExamModel"); 
+
 
 const PORT = 8000;
-const JWT_SECRET = '123321'; // Use environment variables for better security
+const JWT_SECRET = "123321"; // Use environment variables for better security
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // for text data
-app.use(express.static('public'));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static("public"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
 
 // DB Connection
-mongoose.connect("mongodb://localhost:27017/exam_ms")
-    .then(con => console.log(`Mongoose connected to host: ${con.connection.host}`))
-    .catch(err => console.log(err));
+mongoose
+  .connect("mongodb://localhost:27017/exam_ms")
+  .then((con) =>
+    console.log(`Mongoose connected to host: ${con.connection.host}`)
+  )
+  .catch((err) => console.log(err));
 
 
-// Configure multer storage options
+// Multer storage
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Store images in the 'uploads' directory
-  },
+  destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  },
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${file.fieldname}${ext}`);
+  }
 });
 
-// Initialize multer
-const upload = multer({ storage: storage });
+// File filter (optional: add type/size checks)
+const upload = multer({ storage });
 
-// Example route for user registration with image upload
-app.post("/register", upload.single("image"), async (req, res) => {
+// POST register
+app.post("/register", async (req, res) => {
+  const { name, email, password, role } = req.body; // Destructure role
+
   try {
-    // Extract data from req.body
-    const { name, email, phone, address, city, state, zipCode, password, role } = req.body;
-
-    // Check if all required fields are provided
-    if (!name || !email || !phone || !address || !city || !state || !zipCode || !password) {
-      return res.status(400).json({ message: "Please provide all required fields" });
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already registered" });
     }
 
-    // Validate role if provided
-    const validRoles = ['admin', 'student'];
-    if (role && !validRoles.includes(role)) {
-      return res.status(400).json({ message: "Invalid role provided" });
+    // Create and save new user with role
+    const newUser = new User({ name, email, password, role });
+    await newUser.save();
+
+    // Create token
+    const token = jwt.sign(
+      { id: newUser._id, email: newUser.email, role: newUser.role }, // Include role in the payload
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      token, // send token to frontend
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role, // Include role in the response
+      },
+    });
+  } catch (err) {
+    console.error("Registration error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// POST login
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
     }
 
-    // Hash password before saving it to the database
-    const hashedPassword = await bcrypt.hash(password, 10); // Hash the password with salt rounds
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
+    }
 
-    const imageUrl = req.file ? req.file.path : null; // Get image path from file, if uploaded
+    // Create JWT token with role
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },  // Include role in the payload
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
+    );
 
-    // Save the new user to the database
-    const newUser = await userModel.create({
+    // Send response with token and user info
+    res.status(200).json({
+      success: true,
+      token, // Send token to frontend
+      role: user.role, // Include the role
+      userId: user._id,
+      name:user.name
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Handle form data with files
+app.post('/examRegistrations', upload.fields([
+  { name: 'photo', maxCount: 1 },
+  { name: 'signature', maxCount: 1 },
+  { name: 'idProof', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const {
+      name,email, dob, gender, mobilePrimary, mobileReentered, mobileAlternate,
+      country, state, city, idProofType
+    } = req.body;
+
+    const registration = new RegistrationModel({
       name,
       email,
-      phone,
-      address,
-      city,
+      dob,
+      gender,
+      mobilePrimary,
+      mobileReentered,
+      mobileAlternate,
+      country,
       state,
-      zipCode,
-      password: hashedPassword, // Save the hashed password
-      image: imageUrl, // Save the image path in the 'image' field
-      role: role || 'student' // Default to 'student' if role not provided
+      city,
+      idProofType,
+      photo: req.files.photo?.[0]?.path || '',
+      signature: req.files.signature?.[0]?.path || '',
+      idProof: req.files.idProof?.[0]?.path || '',
     });
 
-    res.status(201).json({ message: "User registered successfully", userId: newUser.id });
+    await registration.save();
+    res.status(201).json({ message: 'Registration successful' });
   } catch (error) {
-    console.error(error); // Log the error for debugging
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error('Error saving registration:', error);
+    res.status(500).json({ message: 'Error saving registration' });
   }
 });
 
 
-
-
-// Login with Password Validation and JWT Token
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        const user = await userModel.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'No record exists for this email' });
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Password incorrect' });
-        }
-
-        // Generate JWT token on successful login
-        const token = jwt.sign(
-            { id: user._id, email: user.email },
-            JWT_SECRET,
-            { expiresIn: '1h' } // Token expires in 1 hour
-        );
-
-        res.status(200).json({
-            message: 'Login successful',
-            token,
-            userId: user._id
-        });
-    } catch (err) {
-        res.status(500).json({ message: 'Server error during login', error: err });
-    }
-});
-
-// Route to fetch user data
-app.get('/user/:userId', async (req, res) => {
-  const { userId } = req.params;
-  
+// GET all exams (exam schedule)
+app.get("/exams", async (req, res) => {
   try {
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err });
-  }
-});
-
-// Route to update the users
-app.put("/user/:id", async (req, res) => {
-  try {
-    const updatedUser = await userModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.status(200).json(updatedUser);
+    const exams = await ExamModel.find().sort({ date: 1 }); // sorted by date
+    res.json(exams);
   } catch (error) {
-    res.status(500).json({ message: "Failed to update user", error: error.message });
+    res.status(500).json({ message: "Error fetching exam schedule" });
   }
 });
 
-// In your Express server (server.js or routes file)
-app.get('/users', async (req, res) => {
+// GET top 2 upcoming exams
+app.get("/", async (req, res) => {
   try {
-    const users = await userModel.find();  // Assuming you're using Mongoose
-    res.json(users);
+    const exams = await ExamModel.find()
+      .sort({ date: 1 }) // sort by soonest date
+      .limit(2);         // only return 2 records
+
+    res.json(exams);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch users" });
+    res.status(500).json({ message: "Error fetching exam schedule" });
   }
 });
-

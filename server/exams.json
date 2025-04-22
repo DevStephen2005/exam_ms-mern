@@ -1,0 +1,30 @@
+[
+    {
+      "name": "Math Final Exam",
+      "date": "2025-05-10",
+      "time": "10:00 AM",
+      "duration": "2 hours",
+      "venue": "Hall A",
+      "capacity": 100,
+      "registeredCount": 0
+    },
+    {
+      "name": "Physics Entrance Test",
+      "date": "2025-06-02",
+      "time": "2:00 PM",
+      "duration": "3 hours",
+      "venue": "Auditorium B",
+      "capacity": 80,
+      "registeredCount": 0
+    },
+    {
+      "name": "Chemistry Mock Test",
+      "date": "2025-05-22",
+      "time": "1:00 PM",
+      "duration": "1.5 hours",
+      "venue": "Room 304",
+      "capacity": 60,
+      "registeredCount": 0
+    }
+  ]
+  
