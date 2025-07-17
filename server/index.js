@@ -186,6 +186,27 @@ app.get("/", async (req, res) => {
 
     res.json(exams);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching exam schedule" });
+    res.status(500).json({ message: "Error fetching exam schedule" })
   }
+});
+
+
+
+
+/// GET all students
+app.get("/students", async (req, res) => {
+  const students = await User.find();
+  res.json(students);
+});
+
+// DELETE student
+app.delete("/students/:id", async (req, res) => {
+  await User.findByIdAndDelete(req.params.id);
+  res.json({ message: "Student deleted" });
+});
+
+// UPDATE student
+app.put("/students/:id", async (req, res) => {
+  const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  res.json(updated);
 });

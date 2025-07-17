@@ -44,9 +44,7 @@ const MyRegistrations = () => {
               <p><strong>Date:</strong> {reg.date}</p>
               <p><strong>Time:</strong> {reg.time}</p>
               <p><strong>Venue:</strong> {reg.venue}</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Registered on: {new Date(reg.registrationDate).toLocaleDateString()}
-              </p>
+              
             </div>
           ))}
         </div>

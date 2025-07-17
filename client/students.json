@@ -1,0 +1,33 @@
+[
+    {
+      "id": 1,
+      "name": "stephen",
+      "email": "stephen@gmail.com",
+      "department": "CSE"
+    },
+    {
+      "id": 2,
+      "name": "sam",
+      "email": "sam@gmail.com",
+      "department": "ECE"
+    },
+    {
+      "id": 3,
+      "name": "ram",
+      "email": "ram@gmail.com",
+      "department": "EEE"
+    },
+    {
+      "id": 4,
+      "name": "admin",
+      "email": "admin@gmail.com",
+      "department": "EEE"
+    },
+    {
+      "id": 5,
+      "name": "raj",
+      "email": "raj@gmail.com",
+      "department": "EEE"
+    }
+  ]
+  

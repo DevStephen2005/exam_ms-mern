@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -43,6 +44,7 @@ const Login = () => {
         navigate("/admin_dashboard");
       } else if (role === "student") {
         navigate("/student_dashboard");
+        toast.success("Login Success")
       } else {
         navigate("/");
       }

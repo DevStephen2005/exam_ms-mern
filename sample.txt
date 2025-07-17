@@ -38,3 +38,53 @@ LoadingSpinner.jsx – Optional loader
 
 Toast.jsx / Alert.jsx – Notification for success/error messages
 
+
+1. Introduction
+
+> "Good [morning/afternoon], I am Stephen J, from the Department of Computer Science and Engineering.
+Today, I’m going to present my MERN Stack project titled ‘Online Exam Registration System’.
+This project allows students to register for their semester exams digitally and helps admins manage and track registrations."
+
+
+
+
+---
+
+🔹 2. Problem Statement / Purpose
+
+> "In most colleges, exam registration is still done manually or through basic forms with no central tracking system.
+My project solves this by providing a centralized, user-friendly, and secure platform where students can register for exams, and admins can manage those registrations efficiently."
+
+
+
+
+---
+
+🔹 3. Project Overview (Functionality)
+
+> "This is a full-stack web application with two types of users:
+
+
+
+Students – who can log in, view available exams, and register
+
+Admins – who can view all registrations, approve/reject them, and manage exams
+All operations like adding exams, registering students, and viewing reports are performed through a user-friendly UI."
+
+
+
+---
+
+🔹 4. Technology Stack (MERN)
+
+> "I used the MERN Stack for this project:
+
+
+
+MongoDB – to store student, exam, and registration data
+
+Express.js – to build RESTful APIs
+
+React.js – to create the frontend UI
+
+Node.js – to handle the backend logic"

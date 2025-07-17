@@ -17,6 +17,9 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -37,11 +40,10 @@ export default function RegisterPage() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role, // Send the role to the backend
+        role: formData.role,
       });
 
       if (res.data.success) {
-        // Save token
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
         }
@@ -52,11 +54,11 @@ export default function RegisterPage() {
           email: "",
           password: "",
           confirmPassword: "",
-          role: "student", // Reset role to default
+          role: "student",
         });
-        // redirect to login page 
+
         setTimeout(() => {
-          navigate("/login"); // Or 
+          navigate("/login");
         }, 1500);
       } else {
         setError(res.data.message || "Registration failed");
@@ -79,22 +81,71 @@ export default function RegisterPage() {
         {success && <div className="text-green-500 text-sm mb-4 text-center">{success}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {["name", "email", "password", "confirmPassword"].map((field) => (
-            <div key={field}>
-              <label className="block text-gray-600 text-sm mb-1">
-                {field === "confirmPassword" ? "Confirm Password" : field.charAt(0).toUpperCase() + field.slice(1)}
-              </label>
-              <input
-                type={field.includes("password") ? "password" : field === "email" ? "email" : "text"}
-                name={field}
-                value={formData[field]}
-                onChange={handleChange}
-                required
-                disabled={loading}
-                className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            </div>
-          ))}
+          {/* Name */}
+          <div>
+            <label className="block text-gray-600 text-sm mb-1">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-gray-600 text-sm mb-1">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none"
+            />
+          </div>
+
+          {/* Password */}
+          <div className="relative">
+            <label className="block text-gray-600 text-sm mb-1">Password</label>
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none pr-10"
+            />
+            <span
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-9 cursor-pointer text-gray-500"
+            >
+            </span>
+          </div>
+
+          {/* Confirm Password */}
+          <div className="relative">
+            <label className="block text-gray-600 text-sm mb-1">Confirm Password</label>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none pr-10"
+            />
+            <span
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute right-3 top-9 cursor-pointer text-gray-500"
+            >
+            </span>
+          </div>
 
           {/* Role Dropdown */}
           <div>
@@ -112,6 +163,7 @@ export default function RegisterPage() {
             </select>
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
